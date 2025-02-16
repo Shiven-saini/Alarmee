@@ -1,7 +1,7 @@
 package me.shiven.alarmee.ui.alarm.alarmscreen
 
 import android.annotation.SuppressLint
-import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -11,14 +11,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.Verified
@@ -26,8 +24,8 @@ import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -40,11 +38,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.shiven.alarmee.ui.theme.AlarmeeTheme
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.clock.ClockDialog
+import com.maxkeppeler.sheets.clock.models.ClockConfig
+import com.maxkeppeler.sheets.clock.models.ClockSelection
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DefaultLocale")
 @Composable
 fun AlarmWidget(
@@ -53,18 +54,32 @@ fun AlarmWidget(
     meridian: String = "am",
     isAlarmEnabled: Boolean = false,
     onAlarmEnable: (Boolean) -> Unit = {},
+    isChallengeEnabled: Boolean = false,
+    onChallengeEnable: (Boolean) -> Unit,
     selectedToneName: String = "Melody-chime",
     onTonePickerClick: () -> Unit = {},
     onChallengeClick: () -> Unit = {},
-    onMissionInfoClick: () -> Unit = {},
     onDeleteClick: () -> Unit = {},
     selectedDays: Set<Int> = setOf(1),
     onDaySelected: (Int) -> Unit = {},
+    onTimeClick: (Int, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
     // Internal state and I think, there is no need to hoist this state.
     var isExpanded by remember { mutableStateOf(false) }
+    val timeDialogState = rememberUseCaseState()
+
+    ClockDialog(
+        state = timeDialogState,
+        config = ClockConfig(
+            is24HourFormat = false
+        ),
+        selection = ClockSelection.HoursMinutes { hours, minutes ->
+            Log.d("Usecase", "Just updated the time of the alarm")
+            onTimeClick(hours, minutes)
+        }
+    )
 
     Card(
         shape = RoundedCornerShape(20.dp),
@@ -99,6 +114,7 @@ fun AlarmWidget(
             )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.clickable { timeDialogState.show() }
             ) {
                 Text(
                     text = String.format("%d:%02d", hour, minute),
@@ -178,21 +194,16 @@ fun AlarmWidget(
                             tint = MaterialTheme.colorScheme.onTertiaryContainer,
                         )
                         Text(
-                            text = "Wake-up Challenges",
+                            text = "Wake-up Challenge",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                     }
 
-                    IconButton(
-                        onClick = onMissionInfoClick,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Info,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                    }
+                    SwitchWidget(
+                        checked = isChallengeEnabled,
+                        onCheckedChange = onChallengeEnable
+                    )
                 }
 
                 Row(
@@ -245,22 +256,23 @@ fun SwitchWidget(checked: Boolean = false, onCheckedChange: (Boolean) -> Unit = 
 }
 
 
-@Preview(
-    showBackground = true, showSystemUi = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
-)
-@Composable
-private fun AlarmWidgetPreview() {
-    AlarmeeTheme{
-        Column(
-            Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AlarmWidget(
-                hour = 5,
-                minute = 30
-            )
-        }
-    }
-}
+//@Preview(
+//    showBackground = true, showSystemUi = true,
+//    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+//)
+//@Composable
+//private fun AlarmWidgetPreview() {
+//    AlarmeeTheme{
+//        Column(
+//            Modifier.fillMaxSize(),
+//            verticalArrangement = Arrangement.Center,
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            AlarmWidget(
+//                hour = 5,
+//                minute = 30,
+//                onTimeClick = (Int, Int) -> Unit
+//            )
+//        }
+//    }
+//}

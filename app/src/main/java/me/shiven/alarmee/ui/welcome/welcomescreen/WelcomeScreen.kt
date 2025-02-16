@@ -16,16 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.shiven.alarmee.R
+import me.shiven.alarmee.ui.theme.AlarmeeTheme
 
 @Composable
 fun WelcomeScreen(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
 
     Column(
         modifier = modifier
@@ -60,10 +60,10 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
     }
 }
 
-//@Preview
-//@Composable
-//private fun WelcomeScreenPreview() {
-//    ClockTheme {
-//        WelcomeScreen({})
-//    }
-//}
+@Preview
+@Composable
+private fun WelcomeScreenPreview() {
+    AlarmeeTheme {
+        WelcomeScreen()
+    }
+}

@@ -14,7 +14,9 @@ import me.shiven.alarmee.data.repository.AlarmRepository
 import me.shiven.alarmee.domain.usecase.AddAlarmUseCase
 import me.shiven.alarmee.domain.usecase.DeleteAlarmUseCase
 import me.shiven.alarmee.domain.usecase.EnableAlarmUseCase
+import me.shiven.alarmee.domain.usecase.SetAlarmChallengeUseCase
 import me.shiven.alarmee.domain.usecase.UpdateAlarmDayUseCase
+import me.shiven.alarmee.domain.usecase.UpdateAlarmTimeUseCase
 import me.shiven.alarmee.domain.usecase.UpdateAlarmToneUseCase
 import javax.inject.Inject
 
@@ -25,6 +27,8 @@ class AlarmViewModel @Inject constructor(
     private val deleteAlarmUseCase: DeleteAlarmUseCase,
     private val updateAlarmToneUseCase: UpdateAlarmToneUseCase,
     private val updateAlarmDayUseCase: UpdateAlarmDayUseCase,
+    private val updateAlarmTimeUseCase: UpdateAlarmTimeUseCase,
+    private val setAlarmChallengeUseCase: SetAlarmChallengeUseCase,
     private val alarmRepository: AlarmRepository
 ): ViewModel() {
 
@@ -52,8 +56,16 @@ class AlarmViewModel @Inject constructor(
         addAlarmUseCase(hour, minute)
     }
 
+    fun updateAlarmTime(hour: Int, minute: Int, alarm: Alarm) = viewModelScope.launch(Dispatchers.IO) {
+        updateAlarmTimeUseCase(hour, minute, alarm)
+    }
+
     fun deleteAlarm(alarm: Alarm) = viewModelScope.launch(Dispatchers.IO) {
         deleteAlarmUseCase(alarm)
+    }
+
+    fun setAlarmChallenge(challengeStatus: Boolean, alarm: Alarm) = viewModelScope.launch(Dispatchers.IO) {
+        setAlarmChallengeUseCase(challengeStatus, alarm)
     }
 }
 
