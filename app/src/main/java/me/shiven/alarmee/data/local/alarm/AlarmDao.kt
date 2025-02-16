@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import me.shiven.alarmee.domain.model.ChallengeList
 
 @Dao
 interface AlarmDao {
