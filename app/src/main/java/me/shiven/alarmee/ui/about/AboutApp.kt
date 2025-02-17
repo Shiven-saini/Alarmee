@@ -41,12 +41,14 @@ fun AboutApp(onGitHubClick: (String) -> Unit = {}) {
 
     val githubURL = "https://github.com/Shiven-saini/"
     val twitterURL = "https://x.com/rip_syntax"
+    val sourceURL = "https://github.com/Shiven-saini/Alarmee"
 
     val context = LocalContext.current
 
     // Create an implicit intent with ACTION_VIEW
     val githubIntent = Intent(Intent.ACTION_VIEW, Uri.parse(githubURL))
     val twitterIntent = Intent(Intent.ACTION_VIEW, Uri.parse(twitterURL))
+    val sourceIntent = Intent(Intent.ACTION_VIEW, Uri.parse(sourceURL))
 
 
     Scaffold(
@@ -106,9 +108,13 @@ fun AboutApp(onGitHubClick: (String) -> Unit = {}) {
                 Row(
                     modifier = Modifier.fillMaxWidth()
                         .align(Alignment.BottomStart)
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .clickable {
+                            context.startActivity(sourceIntent)
+                        }
+                    ,
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(20.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.github_mark),
