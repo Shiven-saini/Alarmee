@@ -25,7 +25,7 @@ import me.shiven.alarmee.R
 import me.shiven.alarmee.ui.theme.AlarmeeTheme
 
 @Composable
-fun WelcomeScreen(modifier: Modifier = Modifier) {
+fun WelcomeScreen(onProceedClick: () -> Unit, modifier: Modifier = Modifier) {
 
     Column(
         modifier = modifier
@@ -55,7 +55,7 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(80.dp))
         ProceedButton(
-            onClick = {  }
+            onClick = onProceedClick
         )
     }
 }
@@ -64,6 +64,8 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
 @Composable
 private fun WelcomeScreenPreview() {
     AlarmeeTheme {
-        WelcomeScreen()
+        WelcomeScreen(
+            onProceedClick = {}
+        )
     }
 }

@@ -114,6 +114,7 @@ class AlarmSchedulerImpl(
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("toneUri", alarm.tone)
             putExtra("toShowChallenge", alarm.challengeStatus)
+            putExtra("alarmId", alarm.id)
         }
         return PendingIntent.getBroadcast(
             context,

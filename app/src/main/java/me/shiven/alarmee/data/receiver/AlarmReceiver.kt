@@ -9,6 +9,8 @@ class AlarmReceiver : BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {
         val toneCollected = intent?.getStringExtra("toneUri")
         val toShowChallenge = intent?.getBooleanExtra("toShowChallenge", false)
+        val alarmId = intent?.getIntExtra("alarmId", 100)
+        println("Alarm intent received with id : $alarmId")
 
         context?.let {
             val dismissIntent = Intent(it, DismissActivity::class.java).apply {

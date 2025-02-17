@@ -111,7 +111,10 @@ class DismissActivity : ComponentActivity() {
                         }
                     }
                     composable<DismissGraph.QRAppRoute> {
-                        QRApp()
+                        QRApp{
+                            stopAlarmToneUseCase()
+                            this@DismissActivity.finish()
+                        }
                     }
                     composable<DismissGraph.NFCAppRoute> {
                         NFCApp()

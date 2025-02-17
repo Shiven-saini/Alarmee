@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import me.shiven.alarmee.data.local.alarm.AlarmDao
 import me.shiven.alarmee.data.local.alarm.AlarmDatabase
+import me.shiven.alarmee.data.local.qrcode.QrCodeDatabase
 import javax.inject.Singleton
 
 @Module
@@ -31,5 +32,18 @@ object DatabaseModule {
     fun provideAlarmDao(alarmDatabase: AlarmDatabase): AlarmDao {
         return alarmDatabase.alarmDao
     }
+
+    @Provides
+    @Singleton
+    fun provideQrCodeDatabase(@ApplicationContext appContext: Context): QrCodeDatabase =
+        Room.databaseBuilder(
+            appContext,
+            QrCodeDatabase::class.java,
+            "qr_code_db"
+        ).fallbackToDestructiveMigration()
+            .build()
+
+    @Provides
+    fun provideQrCodeDao(database: QrCodeDatabase) = database.qrCodeDao()
 
 }

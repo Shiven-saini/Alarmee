@@ -23,7 +23,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            // Use the default ProGuard configuration and your custom rules
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -81,6 +83,7 @@ dependencies {
 
     // Accompanist Permissions
     implementation("com.google.accompanist:accompanist-permissions:0.37.0")
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
 
     // Material3 dependencies
     implementation("androidx.compose.material:material-icons-extended-android:1.7.7")
@@ -102,6 +105,8 @@ dependencies {
 
     // ML Kit library for barcode-scanning
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
+
+    implementation("com.google.zxing:core:3.2.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

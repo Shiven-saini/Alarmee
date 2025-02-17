@@ -7,8 +7,8 @@ import me.shiven.alarmee.domain.model.ChallengeList
 @Entity(tableName = "alarm_table")
 data class Alarm(
 
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey
+    val id: Int,
     val hour: Int,
     val minute: Int,
     val isAm: Boolean = true,

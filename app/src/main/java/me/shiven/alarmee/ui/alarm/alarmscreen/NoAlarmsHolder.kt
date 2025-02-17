@@ -25,7 +25,7 @@ fun NoAlarmsHolder(modifier: Modifier = Modifier) {
         Image(
             painter = painterResource(R.drawable.no_alarms),
             contentDescription = null,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
         )
         Text(
             text = "Oops, No Alarms!",

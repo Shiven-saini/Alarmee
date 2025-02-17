@@ -14,18 +14,15 @@ class SetAlarmChallengeUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(challengeStatus: Boolean, alarm: Alarm) {
 
-        // Cancel the previous alarm
-        if(alarm.isEnabled) {
-            alarmScheduler.cancelAlarm(alarm)
-        }
-        Log.d("UseCase", "Cancelled the old alarm!")
+
+        alarmScheduler.cancelAlarm(alarm)
+        println("Usecase : Cancelled the old alarm : $alarm")
 
         val newAlarm = alarm.copy(
             challengeStatus = challengeStatus
         )
         alarmRepository.updateAlarm(newAlarm)
-        Log.d("UseCase", "Scheduled and updated the challenge status of alarm.")
-        Log.d("Usecase", "$newAlarm")
+        println("Use case : Scheduled the latest alarm : $newAlarm")
         if(newAlarm.isEnabled) {
             alarmScheduler.scheduleAlarm(newAlarm)
         }
