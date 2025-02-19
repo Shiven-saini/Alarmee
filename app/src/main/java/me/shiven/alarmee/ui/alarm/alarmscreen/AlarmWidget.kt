@@ -2,6 +2,7 @@ package me.shiven.alarmee.ui.alarm.alarmscreen
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -90,7 +91,7 @@ fun AlarmWidget(
         modifier = modifier.animateContentSize(
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessMediumLow
+                stiffness = Spring.StiffnessHigh
             )
         )
     ) {
@@ -118,14 +119,13 @@ fun AlarmWidget(
             ) {
                 Text(
                     text = String.format("%d:%02d", hour, minute),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontSize = 30.sp,
+                    style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
                 Text(
                     text = meridian,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
             }

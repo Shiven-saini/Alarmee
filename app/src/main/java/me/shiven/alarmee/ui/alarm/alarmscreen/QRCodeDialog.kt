@@ -1,6 +1,7 @@
 package me.shiven.alarmee.ui.alarm.alarmscreen
 
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,13 +26,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun QRCodeDialog(
     isLoading: Boolean,
@@ -40,6 +48,23 @@ fun QRCodeDialog(
     saveQrCode: () -> Unit,
     onDismiss: () -> Unit
 ) {
+
+    val context = LocalContext.current
+    val cameraPermissionState =
+        rememberPermissionState(permission = android.Manifest.permission.CAMERA)
+
+    LaunchedEffect(key1 = cameraPermissionState.status) {
+        // Request Camera Permission after both required permissions are granted.
+        if (cameraPermissionState.status !is PermissionStatus.Granted) {
+            cameraPermissionState.launchPermissionRequest()
+        }
+    }
+
+    // Check camera permission before showing dialog
+    if (!cameraPermissionState.status.isGranted) {
+        Toast.makeText(context, "Enable camera permission to use QR features", Toast.LENGTH_SHORT)
+            .show()
+    }
     // Create a Material Design dialog popup.
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -96,7 +121,7 @@ fun QRCodeDialog(
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Retry")
+                        Text(text = "Regenerate", style = MaterialTheme.typography.bodyMedium)
                     }
                     ElevatedButton(onClick = saveQrCode) {
                         Icon(
@@ -104,8 +129,6 @@ fun QRCodeDialog(
                             contentDescription = "Save QR Code",
                             tint = MaterialTheme.colorScheme.onSurface
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Save")
                     }
                 }
             }

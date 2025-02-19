@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,6 +52,7 @@ fun AboutApp(onGitHubClick: (String) -> Unit = {}) {
     val twitterIntent = Intent(Intent.ACTION_VIEW, Uri.parse(twitterURL))
     val sourceIntent = Intent(Intent.ACTION_VIEW, Uri.parse(sourceURL))
 
+    val scrollState = rememberScrollState()
 
     Scaffold(
         topBar = {
@@ -61,8 +64,7 @@ fun AboutApp(onGitHubClick: (String) -> Unit = {}) {
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(start = 10.dp)
-                    )
-                        },
+                    ) },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -74,7 +76,8 @@ fun AboutApp(onGitHubClick: (String) -> Unit = {}) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Box(
@@ -95,7 +98,8 @@ fun AboutApp(onGitHubClick: (String) -> Unit = {}) {
                     .align(Alignment.TopStart)) {
                     Text(
                         text = "Alarmee App",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        textDecoration = TextDecoration.Underline
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -124,7 +128,8 @@ fun AboutApp(onGitHubClick: (String) -> Unit = {}) {
 
                     Text(
                         text = "Source code",
-                        textDecoration = TextDecoration.Underline
+                        textDecoration = TextDecoration.Underline,
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
@@ -176,7 +181,8 @@ fun AboutApp(onGitHubClick: (String) -> Unit = {}) {
 
                                 Text(
                                     text = "@shiven-saini",
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             }
 
@@ -197,7 +203,8 @@ fun AboutApp(onGitHubClick: (String) -> Unit = {}) {
 
                                 Text(
                                     text = "@rip_syntax",
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                         }

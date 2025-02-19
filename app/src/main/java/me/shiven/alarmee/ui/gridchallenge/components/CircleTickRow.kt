@@ -1,5 +1,11 @@
 package me.shiven.alarmee.ui.gridchallenge.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,7 +49,13 @@ fun CircleTickRow(
                     .background(color = circleBackgroundColor, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                if (index < tickedCircles) {
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = index < tickedCircles,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 300)) +
+                            scaleIn(initialScale = 0.8f, animationSpec = tween(durationMillis = 300)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 300)) +
+                            scaleOut(targetScale = 0.8f, animationSpec = tween(durationMillis = 300))
+                ) {
                     Icon(
                         imageVector = Icons.Outlined.DoneOutline,
                         contentDescription = "Tick",

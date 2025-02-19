@@ -2,11 +2,15 @@ package me.shiven.alarmee.ui.alarm.alarmscreen
 
 import android.app.Activity
 import android.content.Intent
+import android.content.IntentFilter
 import android.media.RingtoneManager
 import android.net.Uri
+import android.nfc.NfcAdapter
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,18 +49,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.wear.compose.material.ContentAlpha
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.clock.ClockDialog
 import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
 import me.shiven.alarmee.data.local.alarm.Alarm
+import me.shiven.alarmee.data.receiver.NFCStateReceiver
 import me.shiven.alarmee.domain.model.ChallengeList
 import me.shiven.alarmee.ui.alarm.AlarmViewModel
 
-
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlarmScreen(viewModel: AlarmViewModel) {
@@ -67,7 +75,24 @@ fun AlarmScreen(viewModel: AlarmViewModel) {
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    val nfcAdapter: NfcAdapter? = NfcAdapter.getDefaultAdapter(context)
+    // NFC is enabled only if the adapter exists and its isEnabled returns true.
+    val isNfcEnabledState = remember { mutableStateOf(nfcAdapter != null && nfcAdapter.isEnabled ?: false) }
+
+    // Register the NFC state change receiver so that state updates automatically.
+    DisposableEffect(context) {
+        val receiver = NFCStateReceiver { isEnabled ->
+            isNfcEnabledState.value = isEnabled
+        }
+        val filter = IntentFilter(NfcAdapter.ACTION_ADAPTER_STATE_CHANGED)
+        context.registerReceiver(receiver, filter)
+        onDispose {
+            context.unregisterReceiver(receiver)
+        }
+    }
+
     val savedChallenge by viewModel.selectedChallenge.collectAsState(initial = ChallengeList.GRID_GAME)
+    val isQrDatabaseEmpty by viewModel.isDatabaseEmpty.collectAsState(initial = true)
 
     val ringtonePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -117,10 +142,18 @@ fun AlarmScreen(viewModel: AlarmViewModel) {
     AnimatedVisibility(showChallengeDialog) {
         ChallengeDialog(
             selectedCard = savedChallenge,
-            onDismissRequest = {showChallengeDialog = false}
+            onDismissRequest = {showChallengeDialog = false},
+            isQrDatabaseEmpty = isQrDatabaseEmpty
         ) { selectedCardIndex ->
             viewModel.updateChallengeSelected(selectedCardIndex)
             showChallengeDialog = false
+        }
+    }
+
+    var showNfcDialog by remember { mutableStateOf(false) }
+    AnimatedVisibility(showNfcDialog) {
+        NfcProgramDialog {
+            showNfcDialog = false
         }
     }
 
@@ -202,7 +235,9 @@ fun AlarmScreen(viewModel: AlarmViewModel) {
                                 text = {
                                     Text(
                                         text = "Program an NFC Tag",
-                                        color = MaterialTheme.colorScheme.onSurface,
+                                        color = if (isNfcEnabledState.value)
+                                            MaterialTheme.colorScheme.onSurface
+                                        else MaterialTheme.colorScheme.onSurface.copy(alpha = ContentAlpha.disabled),
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 },
@@ -210,10 +245,25 @@ fun AlarmScreen(viewModel: AlarmViewModel) {
                                     Icon(
                                         imageVector = Icons.Rounded.Nfc,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = if (isNfcEnabledState.value)
+                                            MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.primary.copy(alpha = ContentAlpha.disabled)
                                     )
                                 },
-                                onClick = { expanded = false }
+                                modifier = Modifier.alpha(if (isNfcEnabledState.value) 1f else 0.5f),
+                                onClick = {
+                                    if (isNfcEnabledState.value) {
+                                        expanded = false
+                                        showNfcDialog = true
+                                    } else {
+                                        expanded = false
+                                        val toastMessage = if (nfcAdapter == null)
+                                            "NFC is not supported on this device"
+                                        else
+                                            "NFC is supported but is disabled right now"
+                                        Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                             )
                         }
                     }
@@ -226,7 +276,7 @@ fun AlarmScreen(viewModel: AlarmViewModel) {
                 onClick = { timeDialogState.show() },
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.padding(bottom = 80.dp)
+                modifier = Modifier.padding(bottom = 0.dp)
             ) {
                 Text(
                     text = "Add Alarm",
@@ -277,3 +327,4 @@ fun AlarmScreen(viewModel: AlarmViewModel) {
         }
     }
 }
+

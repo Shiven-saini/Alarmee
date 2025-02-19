@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.8")
     // Coroutine dependencies
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")

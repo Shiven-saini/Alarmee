@@ -6,11 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -27,7 +27,7 @@ fun GridChallengeBox(
     onStartChallenge: () -> Unit            // Callback to start the challenge
 ) {
     LaunchedEffect(Unit) {
-        onStartChallenge()                  // Call the provided callback instead of viewModel.startChallenge()
+        onStartChallenge()                  // Start the challenge once composed
     }
 
     Box(
@@ -37,22 +37,27 @@ fun GridChallengeBox(
         contentAlignment = Alignment.Center
     ) {
         Column(
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Build the grid row by row.
+            // Build the grid row by row
             for (row in 0 until gridSize) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     for (col in 0 until gridSize) {
                         val tileState = grid[row][col]
                         val tileColor = when (tileState) {
                             TileState.Normal   -> Color.LightGray
-                            TileState.Flashing -> Color.Cyan
+                            TileState.Flashing -> Color.Red
                             TileState.Selected -> Color.Green
                         }
                         Box(
                             modifier = Modifier
-                                .size(100.dp)
+                                .weight(1f) // Each box takes an equal share of the row's width
+                                .aspectRatio(1f) // Ensures the box remains square
                                 .background(tileColor, shape = RoundedCornerShape(8.dp))
                                 .clickable { onTileClicked(row, col) }
                         )

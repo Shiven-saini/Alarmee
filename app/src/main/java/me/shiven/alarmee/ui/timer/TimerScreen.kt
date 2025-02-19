@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -157,10 +159,12 @@ fun TimerScreen(
             IconButton(
                 onClick = { toShowDialog.value = true },
             modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+                .padding(top = 40.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Help, // Use a relevant icon
                     contentDescription = "Help",
+                    modifier = Modifier.size(30.dp),
                     tint = Color.White
                 )
             }
@@ -179,6 +183,7 @@ fun TimerScreen(
             color = Color(0xFFFFD700),
             fontSize = 100.sp,
             fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.align(Alignment.Center)
         )
     }

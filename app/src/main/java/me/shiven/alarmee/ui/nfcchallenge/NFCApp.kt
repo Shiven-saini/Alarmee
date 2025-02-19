@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun NFCApp(modifier: Modifier = Modifier) {
+fun NFCApp(onCompletionCallback: () -> Unit) {
     val nfcViewModel: NFCViewModel = hiltViewModel()
-    NFCScreen(nfcViewModel)
+    NFCScreen(nfcViewModel, onCompletionCallback)
 }

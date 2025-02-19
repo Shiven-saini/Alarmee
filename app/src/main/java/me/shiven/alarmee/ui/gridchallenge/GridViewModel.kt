@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.shiven.alarmee.domain.usecase.TriggerVibrationUseCase
 import javax.inject.Inject
 
 // Enum to represent each tile's display state.
@@ -37,7 +38,9 @@ sealed class UiEvent {
 }
 
 @HiltViewModel
-class GridViewModel @Inject constructor() : ViewModel() {
+class GridViewModel @Inject constructor(
+    private val triggerVibrationUseCase: TriggerVibrationUseCase
+) : ViewModel() {
     val gridSize = 3
 
     private val _circleState = MutableStateFlow(CirclesState())
@@ -139,6 +142,7 @@ class GridViewModel @Inject constructor() : ViewModel() {
     // Resets the challenge on error and restarts the flash sequence.
     private fun resetChallenge() {
         viewModelScope.launch {
+            triggerVibrationUseCase()
             resetGrid()
             userSequence.clear()
             challengeSequence = generateChallengeSequence()

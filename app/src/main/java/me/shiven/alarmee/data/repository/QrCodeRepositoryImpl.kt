@@ -24,4 +24,8 @@ class QrCodeRepositoryImpl @Inject constructor(
         return qrCodeDao.getLatestQrCode()?.text
     }
 
+    override suspend fun isQrCodeDatabaseEmpty(): Boolean {
+        return qrCodeDao.getLatestQrCode() == null
+    }
+
 }

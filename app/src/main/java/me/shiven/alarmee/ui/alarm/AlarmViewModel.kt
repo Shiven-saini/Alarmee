@@ -1,6 +1,8 @@
 package me.shiven.alarmee.ui.alarm
 
 import android.graphics.Bitmap
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,6 +24,7 @@ import me.shiven.alarmee.data.local.alarm.Alarm
 import me.shiven.alarmee.data.repository.AlarmRepository
 import me.shiven.alarmee.domain.model.ChallengeList
 import me.shiven.alarmee.domain.usecase.AddAlarmUseCase
+import me.shiven.alarmee.domain.usecase.CheckQrCodeDatabaseEmptyUseCase
 import me.shiven.alarmee.domain.usecase.DeleteAlarmUseCase
 import me.shiven.alarmee.domain.usecase.EnableAlarmUseCase
 import me.shiven.alarmee.domain.usecase.GenerateQRCodeUseCase
@@ -33,6 +36,7 @@ import me.shiven.alarmee.domain.usecase.UpdateAlarmDayUseCase
 import me.shiven.alarmee.domain.usecase.UpdateAlarmTimeUseCase
 import me.shiven.alarmee.domain.usecase.UpdateAlarmToneUseCase
 import me.shiven.alarmee.domain.usecase.UpdateChallengeSelectedUseCase
+import java.lang.Thread.State
 import javax.inject.Inject
 
 @HiltViewModel
@@ -49,8 +53,12 @@ class AlarmViewModel @Inject constructor(
     private val getLatestQrCodeUseCase: GetLatestQrCodeUseCase,
     private val updateChallengeSelectedUseCase: UpdateChallengeSelectedUseCase,
     private val getChallengeSelectedUseCase: GetChallengeSelectedUseCase,
+    private val checkQrCodeDatabaseEmptyUseCase: CheckQrCodeDatabaseEmptyUseCase,
     private val alarmRepository: AlarmRepository
 ): ViewModel() {
+
+    private val _isDatabaseEmpty = MutableStateFlow<Boolean>(true)
+    val isDatabaseEmpty: StateFlow<Boolean> = _isDatabaseEmpty.asStateFlow()
 
     // State flows to hold the QR bitmap and loading flag.
     private val _qrBitmap = MutableStateFlow<Bitmap?>(null)
@@ -73,6 +81,16 @@ class AlarmViewModel @Inject constructor(
             getLatestQrCodeUseCase()?.let{
                 _qrBitmap.value = generateQRCodeUseCase(it)
             }
+        }
+        checkDatabaseEmpty()
+
+    }
+
+     fun checkDatabaseEmpty() {
+        viewModelScope.launch {
+            // Invoke the use case to check if the database is empty.
+            val empty = checkQrCodeDatabaseEmptyUseCase()
+            _isDatabaseEmpty.value = empty
         }
     }
 
