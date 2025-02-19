@@ -16,10 +16,13 @@ class UpdateAlarmTimeUseCase @Inject constructor(
         // Cancel the already existing alarm
         alarmScheduler.cancelAlarm(alarm)
 
+        val isAm: Boolean = if (hour == 12) false else hour < 12
+
         // updating the alarm with new time.
         val newAlarm = alarm.copy(
-            hour = hour,
-            minute = minute
+            hour = hour % 12,
+            minute = minute,
+            isAm = isAm
         )
 
         Log.d("Usecase", "Updated the time in our alarm!")

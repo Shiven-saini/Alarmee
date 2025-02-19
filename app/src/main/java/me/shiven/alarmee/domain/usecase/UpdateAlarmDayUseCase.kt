@@ -14,6 +14,7 @@ class UpdateAlarmDayUseCase @Inject constructor(
     private val alarmScheduler: AlarmSchedulerImpl
 ){
     suspend operator fun invoke(id: Int, alarm: Alarm){
+        alarmScheduler.cancelAlarm(alarm)
         val repeatDaysList = if(alarm.repeatDays == ""){
             mutableListOf()
         } else {

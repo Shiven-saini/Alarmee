@@ -13,11 +13,18 @@ class UpdateAlarmToneUseCase @Inject constructor (
     private val alarmScheduler: AlarmSchedulerImpl
 ){
     suspend operator fun invoke(alarmUri: String, alarm: Alarm?) {
-        val newAlarm = alarm?.copy(
-            tone = alarmUri
-        )
+        lateinit var newAlarm: Alarm
+        alarm?.let {
+            alarmScheduler.cancelAlarm(it)
+        }
 
-        alarmRepository.updateAlarm(newAlarm!!)
+        alarm?.let {
+            newAlarm = alarm.copy(
+                tone = alarmUri
+            )
+        }
+
+        alarmRepository.updateAlarm(newAlarm)
         Log.d("Usecase", "Just updated the tone")
         alarmScheduler.scheduleAlarm(newAlarm)
     }
