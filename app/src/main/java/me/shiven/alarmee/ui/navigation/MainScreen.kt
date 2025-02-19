@@ -1,8 +1,11 @@
 package me.shiven.alarmee.ui.navigation
 
+
 import android.Manifest
+import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -20,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +31,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -60,53 +62,49 @@ import me.shiven.alarmee.ui.timer.TimerApp
 // Data class for bottom navigation items
 data class BottomNavItem(val route: String, val label: String, val icon: ImageVector)
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MainScreen() {
-// Create the navigation controller (existing code)
     val navController = rememberNavController()
     val context = LocalContext.current
 
-// Create individual permission states using Accompanist Permissions.
-// REQUIRED PERMISSIONS:
-// Note: Replace the permission string below with the one appropriate for full screen notifications in your app.
-    val notificationPermissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
-    val fullScreenNotificationPermissionState =
-        rememberPermissionState(permission = "android.permission.USE_FULL_SCREEN_INTENT")
+    // Notification permission state
+    val notificationPermissionState = rememberPermissionState(
+        permission = Manifest.permission.POST_NOTIFICATIONS
+    )
 
-// A state that allows the optional camera permission dialog to be dismissed by the user.
-    var showCameraDialog by remember { mutableStateOf(true) }
+    // State to track if full-screen notification permission is granted
+    var isFullScreenPermissionGranted by remember { mutableStateOf(false) }
+    // This flag is set after notification permission is granted and delay elapsed.
+    var delayForFullScreenCheck by remember { mutableStateOf(false) }
 
-// Immediately request the permissions on composition.
-    LaunchedEffect(key1 = notificationPermissionState.status) {
-// Request Notification Permission first
+    // Request notification permission immediately.
+    LaunchedEffect(notificationPermissionState.status) {
         if (notificationPermissionState.status !is PermissionStatus.Granted) {
             notificationPermissionState.launchPermissionRequest()
+        } else {
+            // Once notification permission is granted, wait a bit before checking full-screen permission.
+            delay(300L)
+            delayForFullScreenCheck = true
         }
     }
 
-    LaunchedEffect(key1 = fullScreenNotificationPermissionState.status) {
-// Only request Full Screen Notification Intent after Notification is granted.
-        if (notificationPermissionState.status is PermissionStatus.Granted &&
-            fullScreenNotificationPermissionState.status !is PermissionStatus.Granted
-        ) {
-            fullScreenNotificationPermissionState.launchPermissionRequest()
+    // Continuously poll for full-screen permission until it is granted.
+    LaunchedEffect(delayForFullScreenCheck) {
+        if (delayForFullScreenCheck) {
+            while (!isFullScreenNotificationPermissionGranted(context)) {
+                // Wait for one second before checking again.
+                delay(1000L)
+            }
+            // Once the permission is granted, update the state.
+            isFullScreenPermissionGranted = true
         }
     }
 
-
-// Determine if any required permission is missing.
-    val requiredPermissionsMissing =
-        notificationPermissionState.status !is PermissionStatus.Granted ||
-                fullScreenNotificationPermissionState.status !is PermissionStatus.Granted
-
-// Wrap the main UI in a Box so that modal overlays can appear on top.
     Box(modifier = Modifier.fillMaxSize()) {
-        // Existing UI: Scaffold with bottom navigation bar and NavHost
-        Scaffold(
-            bottomBar = { BottomNavigationBar(navController = navController) }
-        ) { innerPadding ->
+        // Main UI Content
+        Scaffold(bottomBar = { BottomNavigationBar(navController = navController) }) { innerPadding ->
             NavHost(
                 navController = navController,
                 startDestination = "alarm",
@@ -118,11 +116,9 @@ fun MainScreen() {
             }
         }
 
-        // If any mandatory (required) permissions are missing, show a constant, non-dismissable dialog.
-        if (requiredPermissionsMissing) {
-            Dialog(
-                onDismissRequest = { /* Intentionally block dismissal until settings are changed */ }
-            ) {
+        // Block UI with Notification permission dialog if not granted.
+        if (notificationPermissionState.status !is PermissionStatus.Granted) {
+            Dialog(onDismissRequest = { /* Prevent dismissal until permission is granted */ }) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -136,17 +132,14 @@ fun MainScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Essential Permissions Required",
+                            text = "Notification Permission Required",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "This app requires Notification and Full Screen Notification permission for full functionality. " +
-                                    "Please tap the button below to open the app settings.",
+                            text = "This app requires notification permission for full functionality. Please tap the button below to open app settings.",
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(24.dp))
@@ -161,7 +154,71 @@ fun MainScreen() {
                 }
             }
         }
+        // Otherwise, if full-screen permission is not granted, block the UI with its dialog.
+        else if (!isFullScreenPermissionGranted) {
+            Dialog(onDismissRequest = { /* Block dismissal until permission is granted */ }) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    tonalElevation = 6.dp,
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Special App Notification Permission Required",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "This app requires special full-screen notification access. Please enable it in the settings.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(
+                            onClick = { openFullScreenIntentSettings(context) },
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(vertical = 12.dp)
+                        ) {
+                            Text(
+                                text = "Open App Settings",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
+}
+
+
+fun isFullScreenNotificationPermissionGranted(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            "android:use_full_screen_intent",
+            android.os.Process.myUid(),
+            context.packageName
+        )
+        mode == AppOpsManager.MODE_ALLOWED
+    } else {
+        true
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+fun openFullScreenIntentSettings(context: Context) {
+    val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
+        .setData(Uri.parse("package:${context.packageName}"))
+    context.startActivity(intent)
 }
 
 
