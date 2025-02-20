@@ -69,13 +69,18 @@ fun MainScreen() {
     val navController = rememberNavController()
     val context = LocalContext.current
 
+
+    var isFullScreenPermissionGranted by remember { mutableStateOf(true) }
     // Notification permission state
     val notificationPermissionState = rememberPermissionState(
         permission = Manifest.permission.POST_NOTIFICATIONS
     )
 
     // State to track if full-screen notification permission is granted
-    var isFullScreenPermissionGranted by remember { mutableStateOf(false) }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        isFullScreenPermissionGranted = false
+    }
+
     // This flag is set after notification permission is granted and delay elapsed.
     var delayForFullScreenCheck by remember { mutableStateOf(false) }
 
@@ -92,13 +97,15 @@ fun MainScreen() {
 
     // Continuously poll for full-screen permission until it is granted.
     LaunchedEffect(delayForFullScreenCheck) {
-        if (delayForFullScreenCheck) {
-            while (!isFullScreenNotificationPermissionGranted(context)) {
-                // Wait for one second before checking again.
-                delay(1000L)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            if (delayForFullScreenCheck) {
+                while (!isFullScreenNotificationPermissionGranted(context)) {
+                    // Wait for one second before checking again.
+                    delay(1000L)
+                }
+                // Once the permission is granted, update the state.
+                isFullScreenPermissionGranted = true
             }
-            // Once the permission is granted, update the state.
-            isFullScreenPermissionGranted = true
         }
     }
 
