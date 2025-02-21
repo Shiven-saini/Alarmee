@@ -16,12 +16,16 @@ import androidx.navigation.compose.composable
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import me.shiven.alarmee.domain.usecase.SetOnBoardingCompletedUseCase
+import me.shiven.alarmee.ui.permission.PermissionApp
 import me.shiven.alarmee.ui.welcome.WelcomeApp
 
 sealed class OnBoardingGraph {
 
     @Serializable
     data object WelcomeAppRoute : OnBoardingGraph()
+
+    @Serializable
+    data object PermissionAppRoute: OnBoardingGraph()
 
     @Serializable
     data object AlarmAppRoute : OnBoardingGraph()
@@ -38,34 +42,72 @@ fun OnBoardingNavigation(navController: NavHostController, startDestination: OnB
     ) {
         composable<OnBoardingGraph.WelcomeAppRoute>(
             exitTransition = {
-                fadeOut(animationSpec = tween(500)) + scaleOut(
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(durationMillis = 500)
+                ) + fadeOut(animationSpec = tween(durationMillis = 500)) + scaleOut(
                     targetScale = 0.8f,
-                    animationSpec = tween(500)
+                    animationSpec = tween(durationMillis = 500)
                 )
             }
         ) {
             WelcomeApp(
                 onProceedClick = {
-                    runBlocking { setOnBoardingCompletedUseCase(true) }
-                    navController.navigate(OnBoardingGraph.AlarmAppRoute) {
-                        popUpTo(OnBoardingGraph.WelcomeAppRoute) { inclusive = true }
-                    }
+                    navController.navigate(OnBoardingGraph.PermissionAppRoute)
                 }
             )
         }
 
+        composable<OnBoardingGraph.PermissionAppRoute>(
+            enterTransition = {
+                // The Permission screen slides in from the right with fade and scale effects.
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(durationMillis = 500)
+                ) + fadeIn(animationSpec = tween(durationMillis = 500)) + scaleIn(
+                    initialScale = 0.8f,
+                    animationSpec = tween(durationMillis = 500)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(durationMillis = 500)
+                ) + fadeOut(animationSpec = tween(durationMillis = 500))
+            },
+            popExitTransition = {
+                // When exiting from the Permission screen, slide it out to the left.
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(durationMillis = 500)
+                ) + fadeOut(animationSpec = tween(durationMillis = 500))
+            }
+        ) {
+            PermissionApp {
+                runBlocking { setOnBoardingCompletedUseCase(true) }
+                navController.navigate(OnBoardingGraph.AlarmAppRoute) {
+                    popUpTo(OnBoardingGraph.PermissionAppRoute) { inclusive = true }
+                }
+            }
+        }
+
         composable<OnBoardingGraph.AlarmAppRoute>(
             enterTransition = {
-                fadeIn(animationSpec = tween(500)) + scaleIn(
+                // The Alarm screen appears with a slide in from the right along with fade and scale.
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(durationMillis = 500)
+                ) + fadeIn(animationSpec = tween(durationMillis = 500)) + scaleIn(
                     initialScale = 0.8f,
-                    animationSpec = tween(500)
+                    animationSpec = tween(durationMillis = 500)
                 )
             },
             popExitTransition = {
+                // When leaving the Alarm screen, it slides out completely to the left.
                 slideOutHorizontally(
-                    targetOffsetX = { it / 2 },
-                    animationSpec = tween(750)
-                ) + fadeOut(animationSpec = tween(750))
+                    targetOffsetX = { -it },
+                    animationSpec = tween(durationMillis = 500)
+                ) + fadeOut(animationSpec = tween(durationMillis = 500))
             }
         ) {
             MainScreen()
