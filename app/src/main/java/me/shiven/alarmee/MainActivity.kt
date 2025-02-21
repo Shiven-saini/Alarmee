@@ -13,10 +13,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import me.shiven.alarmee.domain.usecase.CheckOnBoardingCompletedUseCase
 import me.shiven.alarmee.domain.usecase.SetOnBoardingCompletedUseCase
-import me.shiven.alarmee.ui.navigation.MainScreen
 import me.shiven.alarmee.ui.navigation.OnBoardingGraph
 import me.shiven.alarmee.ui.navigation.OnBoardingNavigation
-import me.shiven.alarmee.ui.permission.PermissionApp
 import me.shiven.alarmee.ui.theme.AlarmeeTheme
 import javax.inject.Inject
 

@@ -40,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -52,7 +51,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import me.shiven.alarmee.R
 import me.shiven.alarmee.ui.permission.PermissionViewModel
 import me.shiven.alarmee.ui.welcome.welcomescreen.ProceedButton
 
@@ -96,7 +94,7 @@ fun PermissionScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(start = 20.dp, end = 20.dp),
+            .padding(start = 20.dp, end = 20.dp, top = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
